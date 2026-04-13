@@ -19,12 +19,10 @@ set_target_properties( NFDBLogicPlugin PROPERTIES
 link_NFSDK("NFDBLogicPlugin")
 
 if(UNIX)
-	target_link_libraries(NFDBLogicPlugin -static-libstdc++)
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)
 else()
-	target_link_libraries(NFDBLogicPlugin -static-libstdc++)
 	add_definitions(
 		-DWIN
 		-DELPP_NO_DEFAULT_LOG_FILE

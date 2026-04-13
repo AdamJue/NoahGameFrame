@@ -1,111 +1,117 @@
+cmake_minimum_required(VERSION 3.21)
+
+if(POLICY CMP0091)
+	cmake_policy(SET CMP0091 NEW)
+endif()
+
+project(NoahFrame LANGUAGES C CXX)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 
-option(BUILD_TOOLS_ONLY "help string describing option" OFF)
-option(BUILD_MID_WARE_SDK "help string describing option" OFF)
+option(BUILD_TOOLS_ONLY "Build only Noah helper tools" OFF)
+option(BUILD_MID_WARE_SDK "Build SDK, examples and external middleware" OFF)
+option(NF_BUILD_RENDER "Build NFRenderPlugin" ${WIN32})
+option(NF_BUILD_BLUEPRINT "Build NFBluePrintPlugin" ${WIN32})
+option(NF_ENABLE_STATIC_LIBSTDCXX "Statically link libstdc++ on GCC/Clang" OFF)
 
-cmake_minimum_required(VERSION 2.8)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-macro(link_NFSDK projName)
-	add_dependencies(${projName} NFNetPlugin NFCore NFMessageDefine)
-	target_link_libraries(${projName} NFCore NFMessageDefine NFNetPlugin)
-endmacro(link_NFSDK)
+if(MSVC)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	add_compile_options(/EHsc /permissive-)
+	add_compile_definitions(NF_DISABLE_MSVC_AUTO_LINK)
+else()
+	add_compile_options(-fPIC)
+endif()
 
-project(NoahFrame)
-
-#OSX上强制生成so后缀的动态库而不是dylib后缀动态库
-if (APPLE)
-	SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
-endif(APPLE)
+# OSX上强制生成so后缀的动态库而不是dylib后缀动态库
+if(APPLE)
+	set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+endif()
 
 set(SolutionDir ${PROJECT_SOURCE_DIR})
-
-if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-	set(NFOutPutDir ${PROJECT_SOURCE_DIR}/_Out/Debug)
+set(NF_DEBUG_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/_Out/Debug")
+set(NF_RELEASE_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/_Out/Release")
+if(CMAKE_CONFIGURATION_TYPES)
+	set(NFOutPutDir "${PROJECT_SOURCE_DIR}/_Out/$<CONFIG>")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set(NFOutPutDir "${NF_DEBUG_OUTPUT_DIR}")
 else()
-	set(NFOutPutDir ${PROJECT_SOURCE_DIR}/_Out/Release)
+	set(NFOutPutDir "${NF_RELEASE_OUTPUT_DIR}")
 endif()
 
-
-message("NFOutPutDir:${NFOutPutDir}")
-
-
-# message(STATUS "SolutionDir=" ${SolutionDir})
-if (APPLE)
-	include_directories(
-		${SolutionDir}
-		${SolutionDir}/Dependencies/
-		${SolutionDir}/Dependencies/NFMessageDefine/
-		${SolutionDir}/NFComm/NFPluginModule/
-		${SolutionDir}/Dependencies/hiredis/hiredis_linux
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-osx/include/
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-osx/include/SDL2
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-osx/include/google/protobuf/ 
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-osx/include/google/protobuf/src/
-	)
-elseif(UNIX)
-	include_directories(
-		${SolutionDir}
-		${SolutionDir}/Dependencies/
-		${SolutionDir}/Dependencies/NFMessageDefine/
-		${SolutionDir}/NFComm/NFPluginModule/
-		${SolutionDir}/Dependencies/hiredis/hiredis_linux
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-linux/include/
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-linux/include/SDL2
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-linux/include/google/protobuf/ 
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-linux/include/google/protobuf/src/
-	)
+if(CMAKE_CONFIGURATION_TYPES)
+	message(STATUS "NF output dirs: Debug=${NF_DEBUG_OUTPUT_DIR}, Release=${NF_RELEASE_OUTPUT_DIR}")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	message(STATUS "NFOutPutDir: ${NF_DEBUG_OUTPUT_DIR}")
 else()
-	include_directories(
-		${SolutionDir}
-		${SolutionDir}/Dependencies/
-		${SolutionDir}/Dependencies/NFMessageDefine/
-		${SolutionDir}/NFComm/NFPluginModule/
-		${SolutionDir}/Dependencies/hiredis/hiredis_win
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-windows-static/include/
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-windows-static/include/SDL2
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-windows-static/include/google/protobuf/ 
-		${SolutionDir}/Dependencies/vcpkg/installed/x64-windows-static/include/google/protobuf/src/
-	)
+	message(STATUS "NFOutPutDir: ${NF_RELEASE_OUTPUT_DIR}")
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-#message("Build Type:"${CMAKE_BUILD_TYPE} ${CMAKE_CXX_FLAGS})
+include_directories(
+	BEFORE
+	"${PROJECT_BINARY_DIR}/generated"
+	"${PROJECT_BINARY_DIR}/generated/NFComm/NFMessageDefine"
+)
 
-if(UNIX)
-	if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -fPIC")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O0 -Wall -g -ggdb -DDEBUG -fPIC")
-	else()
-		set(CMAKE_BUILD_TYPE "Release")
-		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -fPIC")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC -std=c++17 -O3 -Wall")
-	endif()
+include_directories(
+	"${PROJECT_SOURCE_DIR}"
+	"${PROJECT_SOURCE_DIR}/Dependencies"
+	"${PROJECT_SOURCE_DIR}/NFComm/NFPluginModule")
 
-	set(LDFLAGS "$ENV{LDFLAGS} -stdlib=libc++")
-	#MAC不需要这一行
-	if (NOT APPLE)
-		add_definitions(-std=c++17)
-	endif()
+find_package(Threads REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(Lua REQUIRED)
+find_package(SDL2 CONFIG QUIET)
+set(LIBEVENT_STATIC_LINK TRUE)
+if(WIN32)
+	find_package(Libevent CONFIG REQUIRED COMPONENTS core extra)
 else()
-	SET ( CMAKE_CXX_FLAGS "-D_X64 -D_WINDOWS /EHsc" )
-	include_directories(${SolutionDir}/Dependencies/libevent/WIN32-Code/)
+	find_package(Libevent CONFIG REQUIRED COMPONENTS core extra pthreads)
+endif()
+find_package(hiredis CONFIG REQUIRED)
+
+include(NoahBuild)
+
+add_library(noah_libevent INTERFACE)
+target_link_libraries(noah_libevent INTERFACE libevent::core libevent::extra)
+if(TARGET libevent::pthreads)
+	target_link_libraries(noah_libevent INTERFACE libevent::pthreads)
+endif()
+add_library(noah::libevent ALIAS noah_libevent)
+
+add_library(noah_hiredis INTERFACE)
+target_link_libraries(noah_hiredis INTERFACE hiredis::hiredis)
+add_library(noah::hiredis ALIAS noah_hiredis)
+
+add_library(noah_lua INTERFACE)
+target_include_directories(noah_lua INTERFACE "${LUA_INCLUDE_DIR}")
+target_link_libraries(noah_lua INTERFACE "${LUA_LIBRARIES}")
+add_library(noah::lua ALIAS noah_lua)
+
+if(TARGET SDL2::SDL2 OR TARGET SDL2::SDL2-static)
+	add_library(noah_sdl2 INTERFACE)
+	target_link_libraries(noah_sdl2 INTERFACE
+		$<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+		$<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
+	add_library(noah::sdl2 ALIAS noah_sdl2)
+elseif(NF_BUILD_RENDER)
+	message(FATAL_ERROR "NF_BUILD_RENDER=ON requires the SDL2 package from vcpkg.")
 endif()
 
-if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-	set(DependenciesLibPath ${SolutionDir}/Dependencies/lib ${SolutionDir}/_Out/Debug/ ${SolutionDir}/Dependencies/lib/Debug)
-else()
-	set(DependenciesLibPath ${SolutionDir}/Dependencies/lib ${SolutionDir}/_Out/Release/ ${SolutionDir}/Dependencies/lib/Release)
-endif()
-
-
-link_directories(${DependenciesLibPath})
-
-if(${BUILD_TOOLS_ONLY} STREQUAL "ON")
-	message("Build Tools Only")
+if(BUILD_TOOLS_ONLY)
+	message(STATUS "Build Tools Only")
 	add_subdirectory(NFTools)
-elseif(${BUILD_MID_WARE_SDK} STREQUAL "ON")
+elseif(BUILD_MID_WARE_SDK)
+	message(STATUS "Build SDK & MIDWARE")
 	add_subdirectory(NFTools)
-	message("Build SDK & MIDWARE")
 	add_subdirectory(Dependencies)
 	add_subdirectory(NFComm)
 	add_subdirectory(NFServer)
@@ -115,7 +121,7 @@ elseif(${BUILD_MID_WARE_SDK} STREQUAL "ON")
 	add_subdirectory(../NFComm/NFMessageDefineEx NFComm/NFMessageDefineEx)
 	add_subdirectory(../NFComm/NFServerEx NFComm/NFServerEx)
 else()
-	message("Build SDK")
+	message(STATUS "Build SDK")
 	add_subdirectory(Dependencies)
 	add_subdirectory(NFComm)
 	add_subdirectory(NFServer)

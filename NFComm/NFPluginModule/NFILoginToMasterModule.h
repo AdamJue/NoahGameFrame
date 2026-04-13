@@ -32,7 +32,7 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4244 4267)
 #endif
-#include "NFComm/NFMessageDefine/NFMsgPreGame.pb.h"
+#include "NFMsgPreGame.pb.h"
 #ifdef _MSC_VER
 #pragma warning(default: 4244 4267)
 #endif

@@ -59,7 +59,6 @@ target_link_libraries(NFPluginLoader Tutorial7)
 
 
 if (UNIX)
-	target_link_libraries(NFPluginLoader -static-libstdc++ -pthread ${CMAKE_DL_LIBS})
 else()
 endif()
 

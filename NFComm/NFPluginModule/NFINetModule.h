@@ -38,7 +38,7 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4244 4267)
 #endif
-#include "NFComm/NFMessageDefine/NFDefine.pb.h"
+#include "NFDefine.pb.h"
 
 
 enum NF_SERVER_TYPES

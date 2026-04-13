@@ -20,7 +20,6 @@ set_target_properties( NFTestPlugin PROPERTIES
 link_NFSDK("NFTestPlugin")
 
 if(UNIX)
-	target_link_libraries(NFTestPlugin -static-libstdc++)
 
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
@@ -28,7 +27,6 @@ if(UNIX)
 	
 else()
 
-	target_link_libraries(NFTestPlugin -static-libstdc++)
 	
 	add_definitions(
 		-DWIN

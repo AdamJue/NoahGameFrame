@@ -1,36 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
 
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+preset="${1:-}"
 
-sysOS=`uname -s`
-
-
-
-rm -rf vcpkg
-
-git clone https://github.com/Microsoft/vcpkg.git
-
-cd vcpkg
-
-./bootstrap-vcpkg.sh
-
-git clone https://github.com/ketoo/pb.git
-rm -rf ports/protobuf
-cp -r pb ports/protobuf
-
-if [ $sysOS == "Darwin" ];then
-
-    ./vcpkg install libevent:x64-osx
-    ./vcpkg install protobuf:x64-osx
-    #./vcpkg install lua:x64-osx
-    ./vcpkg install sdl2:x64-osx
-
-elif [ $sysOS == "Linux" ];then
-    ./vcpkg install libevent:x64-linux
-    ./vcpkg install protobuf:x64-linux
-    #./vcpkg install lua:x64-linux
-    ./vcpkg install sdl2:x64-linux
-
-
+if [[ -z "${preset}" ]]; then
+    case "$(uname -s)" in
+        Darwin)
+            preset="macos-debug"
+            ;;
+        Linux)
+            preset="linux-debug"
+            ;;
+        *)
+            echo "[ERROR] Unsupported platform: $(uname -s)"
+            exit 1
+            ;;
+    esac
 fi
 
+echo "[DEPRECATED] Dependencies/build_vcpkg.sh is deprecated."
+echo "[DEPRECATED] Please use CMakePresets directly for configure/build."
+echo "[DEPRECATED] Forwarding to: cmake --preset ${preset}"
 
-cd ..
+exec "${script_dir}/build_dep.sh" "${preset}"

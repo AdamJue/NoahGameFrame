@@ -33,7 +33,6 @@ if(UNIX)
 			${SolutionDir}/Dependencies/googletest-release-1.8.0/googletest/include/)
 
 
-	target_link_libraries(NFBluePrintPlugin -static-libstdc++)
 
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
@@ -41,7 +40,6 @@ if(UNIX)
 	
 else()
 
-	target_link_libraries(NFBluePrintPlugin -static-libstdc++)
 	
 	add_definitions(
 		-DWIN

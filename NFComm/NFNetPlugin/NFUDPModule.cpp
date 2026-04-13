@@ -29,26 +29,35 @@
 #define BUF_SIZE                        14500
 //500
 
-static void udp_cb(const int sock, short int which, void *arg)
+static void udp_cb(evutil_socket_t sock, short int which, void *arg)
 {
 	NFUDPModule* udpModule = (NFUDPModule*)arg;
-
+	(void)udpModule;
+	(void)which;
 
 	struct sockaddr_in client_addr;
-	socklen_t size = sizeof(client_addr);
+#if NF_PLATFORM == NF_PLATFORM_WIN
+	int addr_len = sizeof(client_addr);
+#else
+	socklen_t addr_len = sizeof(client_addr);
+#endif
 	char buf[BUF_SIZE];
-	std::string  data(buf);
-	std::cout << std::this_thread::get_id() << " received:" << data.length() << std::endl;
 
 	/* Recv the data, store the address of the sender in server_sin */
-	if (recvfrom(sock, &buf, sizeof(buf) - 1, 0, (struct sockaddr *) &client_addr, &size) == -1)
+	const int recv_len = recvfrom(sock, buf, static_cast<int>(sizeof(buf) - 1), 0, (struct sockaddr*)&client_addr, &addr_len);
+	if (recv_len == -1)
 	{
 		perror("recvfrom()");
 		//event_loopbreak();
+		return;
 	}
+	buf[recv_len] = '\0';
+
+	std::string data(buf, recv_len);
+	std::cout << std::this_thread::get_id() << " received:" << data.length() << std::endl;
 
 	/* Send the data back to the client */
-	if (sendto(sock, data.c_str(), data.length(), 0, (struct sockaddr *) &client_addr, size) == -1 )
+	if (sendto(sock, data.c_str(), static_cast<int>(data.length()), 0, (struct sockaddr*)&client_addr, addr_len) == -1)
 	{
 		perror("sendto()");
 		//event_loopbreak();
@@ -67,7 +76,7 @@ int bind_socket(struct event *ev, int port, void* p)
 		return -1;
 	}
 
-	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int)) < 0)
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&flag), sizeof(flag)) < 0)
 	{
 		perror("setsockopt()");
 		return 1;
@@ -88,7 +97,7 @@ int bind_socket(struct event *ev, int port, void* p)
 		printf("bind() success - [%u]\n", port);
 	}
 
-	event_set(ev, sock_fd, EV_READ | EV_PERSIST, &udp_cb, p);
+	event_set(ev, static_cast<evutil_socket_t>(sock_fd), EV_READ | EV_PERSIST, udp_cb, p);
 	if (event_add(ev, NULL) == -1)
 	{
 		printf("event_add() failed\n");

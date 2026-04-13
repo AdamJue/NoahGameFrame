@@ -26,7 +26,9 @@
 
 #include "NFComm/NFPluginLoader/NFPluginServer.h"
 
+#if NF_PLATFORM == NF_PLATFORM_WIN && !defined(NF_DISABLE_MSVC_AUTO_LINK)
 #pragma comment( lib, "lua.lib" )
+#endif
 #ifndef NF_DYNAMIC_PLUGIN
 //for nf-sdk plugins
 #include "NFComm/NFActorPlugin/NFActorPlugin.h"
@@ -83,7 +85,7 @@
 #include "Tutorial/Tutorial7/Tutorial7.h"
 
 
-#if NF_PLATFORM == NF_PLATFORM_WIN
+#if NF_PLATFORM == NF_PLATFORM_WIN && !defined(NF_DISABLE_MSVC_AUTO_LINK)
 
 #pragma comment( lib, "NFCore.lib" )
 #pragma comment( lib, "NFMessageDefine.lib" )

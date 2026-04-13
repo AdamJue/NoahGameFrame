@@ -32,7 +32,7 @@
 #include "NFComm/NFPluginModule/NFIPlugin.h"
 #include "NFComm/NFPluginModule/NFPlatform.h"
 
-#if NF_PLATFORM == NF_PLATFORM_WIN
+#if NF_PLATFORM == NF_PLATFORM_WIN && !defined(NF_DISABLE_MSVC_AUTO_LINK)
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "ws2_32.lib" )
 #pragma comment( lib, "version.lib" )

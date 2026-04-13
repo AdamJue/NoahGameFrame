@@ -18,14 +18,12 @@ set_target_properties( Tutorial7 PROPERTIES
 link_NFSDK("Tutorial7")
 
 if(UNIX)
-	target_link_libraries(Tutorial7 -static-libstdc++)
 	add_definitions(
 		-D_USRDLL
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)
 
 else()
-	target_link_libraries(Tutorial7 -static-libstdc++)
 	add_definitions(
 		-DWIN
 		-D_USRDLL

@@ -30,7 +30,7 @@
 #include <iosfwd>
 #include "NFComm/NFCore/NFQueue.hpp"
 #include "NFComm/NFCore/NFConsistentHash.hpp"
-#include "NFComm/NFMessageDefine/NFDefine.pb.h"
+#include "NFDefine.pb.h"
 #include "NFComm/NFPluginModule/NFINetClientModule.h"
 #include "NFComm/NFPluginModule/NFINetModule.h"
 #include "NFComm/NFPluginModule/NFILogModule.h"

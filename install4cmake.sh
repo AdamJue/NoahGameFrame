@@ -1,82 +1,47 @@
-# make sure cmake is installed
-cmake --version
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Please install cmake first."
-    echo "[ubuntu] apt-get -y install cmake or [centos] yum -y install cmake or [mac] brew install cmake"
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "$0")" && pwd)"
+mode="$(printf '%s' "${1:-RELEASE}" | tr '[:lower:]' '[:upper:]')"
+
+case "$(uname -s)" in
+    Darwin)
+        platform="macos"
+        ;;
+    Linux)
+        platform="linux"
+        ;;
+    *)
+        echo "[ERROR] Unsupported platform: $(uname -s)"
+        exit 1
+        ;;
+esac
+
+case "${mode}" in
+    DEBUG)
+        preset="${platform}-debug"
+        ;;
+    RELEASE|"")
+        preset="${platform}-release"
+        ;;
+    *)
+        preset="${1}"
+        ;;
+esac
+
+echo "[DEPRECATED] install4cmake.sh is deprecated."
+echo "[DEPRECATED] Please use CMakePresets directly for configure/build."
+echo "[DEPRECATED] Forwarding to:"
+echo "[DEPRECATED]   cmake --preset ${preset}"
+echo "[DEPRECATED]   cmake --build --preset ${preset}"
+
+if ! command -v cmake >/dev/null 2>&1; then
+    echo "[ERROR] cmake was not found in PATH."
+    echo "[HINT] Install CMake 3.21+ and try again."
     exit 1
 fi
 
-unzip -v
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Please install unzip first."
-    echo "[ubuntu] sudo apt-get -y install curl zip unzip tar or [centos] yum -y install unzip or [mac] brew install unzip"
-    exit 1
-fi
-
-automake --version
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Please install automake first."
-    echo "[ubuntu] sudo apt-get -y install automake or [centos] yum -y install automake or [mac] brew install automake"
-    exit 1
-fi
-
-if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
-    DISTRO='CentOS'
-elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
-    DISTRO='Ubuntu'
-else
-    DISTRO='unknow'
-fi
-
-sysOS=`uname -s`
-
-if [ $sysOS == "Darwin" ];then
-	gcc --version
-	if [ $? -ne 0 ]; then
-		echo "[ERROR] Please install gcc first."
-        echo "[mac] brew install gcc"
-        #exit 1
-	fi
-elif [ $sysOS == "Linux" ];then
-    if [ $DISTRO == "Ubuntu" ]; then
-		g++ --version
-		if [ $? -ne 0 ]; then
-			echo "[ERROR] Please install g++ first."
-			echo "[Ubuntu] sudo apt-get -y install g++"
-			exit 1
-		fi
-	elif [ $DISTRO == "CentOS" ]; then
-	    g++ --version
-		if [ $? -ne 0 ]; then
-			echo "[ERROR] Install g++ first, minimum version is 7.0.0"
-            echo "[CentOS Step 1] yum install centos-release-scl -y"
-            echo "[CentOS Step 2] yum install devtoolset-7 -y"
-            echo "[CentOS Step 3] scl enable devtoolset-7 bash"
-			exit 1
-		fi
-		currentver="$(gcc -dumpfullversion -dumpversion)"
-        requiredver="7.0.0"
-        if [ ! "$(printf '%s\n' "$requiredver" "$currentver" | sort -V | head -n1)" = "$requiredver" ]; then
-            echo "[ERROR] Upgrate g++ first, minimum version is 7.0.0"
-            echo "[CentOS Step 1] yum install centos-release-scl -y"
-            echo "[CentOS Step 2] yum install devtoolset-7 -y"
-            echo "[CentOS Step 3] scl enable devtoolset-7 bash"
-			exit 1
-        fi
-	fi
-fi
-#g++  sudo apt-get -y install g++
-#unzip sudo apt-get -y install unzip
-
-#compile dep libraries
-rm -rf ./_Out/Debug
-rm -rf ./_Out/Release
-
-cd ./Dependencies
-chmod -R 755 build_dep.sh
-./build_dep.sh
-cd ../
-
-./buildServer.sh
-
-#pwd
+cd "${repo_root}"
+git submodule update --init --recursive
+cmake --preset "${preset}"
+cmake --build --preset "${preset}"

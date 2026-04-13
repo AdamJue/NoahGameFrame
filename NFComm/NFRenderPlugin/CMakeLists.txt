@@ -58,23 +58,13 @@ add_library(NFRenderPlugin STATIC
 	${IMGUI_ROOT_Hpp}
 	${IMNODES_ROOT_Cpp}
 	${IMNODES_ROOT_Hpp})
-	
-set_target_properties( NFRenderPlugin PROPERTIES OUTPUT_NAME_DEBUG "NFRenderPlugin")
-set_target_properties( NFRenderPlugin PROPERTIES PREFIX "")
-set_target_properties( NFRenderPlugin PROPERTIES
-	FOLDER "NFComm/NFRenderPlugin"
-	ARCHIVE_OUTPUT_DIRECTORY ${NFOutPutDir}
-	RUNTIME_OUTPUT_DIRECTORY ${NFOutPutDir}
-	LIBRARY_OUTPUT_DIRECTORY ${NFOutPutDir} )
-	
-link_NFSDK("NFRenderPlugin")
 
-if(UNIX)
-	if (CMAKE_BUILD_TYPE MATCHES "Release")
-		target_link_libraries(NFRenderPlugin libSDL2.a)
-	else()
-		target_link_libraries(NFRenderPlugin libSDL2d.a)
-	endif()
+nf_configure_library(NFRenderPlugin "NFComm/NFRenderPlugin")
+link_NFSDK("NFRenderPlugin")
+target_link_libraries(NFRenderPlugin noah::sdl2)
+if(MSVC)
+	target_compile_options(NFRenderPlugin PRIVATE /wd4005 /Zc:strictStrings-)
+endif()
 
 if (APPLE)
 	find_library(carbon_lib Carbon)
@@ -106,13 +96,4 @@ if (APPLE)
 	target_link_libraries(NFRenderPlugin ${frameworks})
 
 endif()
-
-	target_link_libraries(NFRenderPlugin -static-libstdc++)
-
-	add_definitions(
-		-DELPP_NO_DEFAULT_LOG_FILE
-	)
-	
-else()
-
-endif()
+target_compile_definitions(NFRenderPlugin PRIVATE ELPP_NO_DEFAULT_LOG_FILE)

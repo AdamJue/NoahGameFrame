@@ -57,27 +57,42 @@ svn checkout https://github.com/ketoo/NoahGameFrame
 
 ## Dependencies
 
-- libevent
-- easylogging++
-- google protobuf
-- hiredis
-- ajson
-- concurrentqueue
-- RapidXML
-- LuaIntf
-- navigation
-- lua
+The project now uses `vcpkg` manifest mode for third-party packages managed by CMake:
+
+- `protobuf` (`3.21.12`)
+- `libevent[thread]`
+- `hiredis`
+- `lua` (`5.3.5`)
+- `sdl2`
+
+The following libraries are still kept inside the repository (or via submodule/vendor source) and are built directly by CMake:
+
+- `easylogging++`
+- `ajson`
+- `concurrentqueue`
+- `RapidXML`
+- `LuaIntf`
+- `navigation`
 
 ## Tutorial && Documents
 
 https://github.com/ketoo/NoahGameFrame/wiki
 
-## IF YOU CAN NOT BUILD THE DEPENDENCIES THEN PLEASE RUN THE CMDS BELOW TO SET UP THE ENVIRONMENT:
+## Environment
 
-* sudo apt-get install g++
-* sudo apt-get install cmake
-* sudo apt-get install automake
-* sudo apt-get install zip unzip
+Install these tools first:
+
+- Git
+- CMake `>= 3.21`
+- A C++17 compiler
+- `vcpkg` (with `VCPKG_ROOT` available, or pass `CMAKE_TOOLCHAIN_FILE` explicitly)
+
+Linux users may still need common build tools such as:
+
+- `g++`
+- `cmake`
+- `ninja-build` or `make`
+- `zip` / `unzip`
 
 ## Supported Compilers
 
@@ -85,20 +100,85 @@ https://github.com/ketoo/NoahGameFrame/wiki
 * MSVC >= VS2019 (**Tested on Win10**)
 
 ## Build and Install
-### FOR WINDOWS, MSVC >= 2019
 
-1. Git pull all source
-2. Run the script file named **build_dep.bat** where located /Dependencies
-(墙内上网的同学请点击：墙内下载依赖库.bat)
-3. Build the solution(if u build failed, please build again(**not rebuild all**))
-4. Run the binary file by **_Out/rund.bat**
+The recommended workflow is `vcpkg + CMakePresets`. The legacy dependency download scripts under `Dependencies/` are no longer required for the default build.
 
-### FOR LINUX(UBUNTU, CENTOS) ---- please use administrator(or sudo) to do these:
-1. Git pull all source
-2. Run **install4cmake.sh** to build NF (or run cd /Dependencies  ./build_dep.sh then run buildServer.sh)
-3. Run the binary file by **_Out/rund.sh**
+For compatibility, `Dependencies/build_dep.bat`, `Dependencies/build_dep.sh`, `Dependencies/build_dep_with_source_code.bat`, `Dependencies/build_vcpkg.sh`, `install4cmake.sh`, and `buildServer.sh` now print a deprecation notice and forward into the preset-based flow instead of using the old dependency/bootstrap pipeline.
 
-### IF YOU LIVING IN A COUNTRY CANNOT ACCESS GITHUB FASTLY PLZ BUILD NF WITH VPN
+### 1. Get source and submodules
+
+```bash
+git clone https://github.com/ketoo/NoahGameFrame.git
+cd NoahGameFrame
+git submodule update --init --recursive
+```
+
+### 2. Configure with presets
+
+Windows MSVC Debug:
+
+```bash
+cmake --preset windows-msvc-debug
+```
+
+Windows MSVC Release:
+
+```bash
+cmake --preset windows-msvc-release
+```
+
+Linux Debug:
+
+```bash
+cmake --preset linux-debug
+```
+
+macOS Debug:
+
+```bash
+cmake --preset macos-debug
+```
+
+### 3. Build
+
+```bash
+cmake --build --preset windows-msvc-debug
+```
+
+or choose the matching preset for your platform:
+
+```bash
+cmake --build --preset windows-msvc-release
+cmake --build --preset linux-debug
+cmake --build --preset linux-release
+cmake --build --preset macos-debug
+cmake --build --preset macos-release
+```
+
+### 4. Output
+
+Build artifacts are written to:
+
+- `build-vcpkg/<preset>/` for CMake intermediate files
+- `_Out/Debug` or `_Out/Release` for final binaries and runtime assets
+
+For example, the default server executable on Windows Debug is:
+
+```text
+_Out/Debug/NFServer.exe
+```
+
+### 5. Optional component switches
+
+You can disable optional modules during configure:
+
+```bash
+cmake --preset windows-msvc-debug -DNF_BUILD_RENDER=OFF -DNF_BUILD_BLUEPRINT=OFF
+```
+
+### 6. Detailed build notes
+
+See `docs/build-with-vcpkg.md` for the full workflow and troubleshooting notes.
 
 ### HOW TO RUN HELLO WORLD
 https://github.com/ketoo/NoahGameFrame/wiki/How-to-run-the-Helloworld

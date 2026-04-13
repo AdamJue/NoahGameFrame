@@ -31,10 +31,10 @@ limitations under the License.
 #include "NFComm/NFCore/NFIPropertyManager.h"
 #include "NFComm/NFCore/NFList.hpp"
 #include "NFLimit.h"
-#include "NFDefine.pb.h"
-#include "NFMsgBase.pb.h"
-#include "NFMsgPreGame.pb.h"
-#include "NFMsgShare.pb.h"
+#include <NFDefine.pb.h>
+#include <NFMsgBase.pb.h>
+#include <NFMsgPreGame.pb.h>
+#include <NFMsgShare.pb.h>
 #include "NFProtocolDefine.hpp"
 
 #ifdef _MSC_VER

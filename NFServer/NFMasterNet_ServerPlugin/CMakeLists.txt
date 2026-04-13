@@ -19,13 +19,11 @@ set_target_properties( NFMasterNet_ServerPlugin PROPERTIES
 link_NFSDK("NFMasterNet_ServerPlugin")
 
 if(UNIX)
-	target_link_libraries(NFMasterNet_ServerPlugin -static-libstdc++)
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)
 
 else()
-	target_link_libraries(NFMasterNet_ServerPlugin -static-libstdc++)
 	add_definitions(
 		-DWIN
 		-DELPP_NO_DEFAULT_LOG_FILE
