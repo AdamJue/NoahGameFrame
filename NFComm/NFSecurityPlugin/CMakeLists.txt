@@ -21,14 +21,12 @@ link_NFSDK("NFSecurityPlugin")
 
 if(UNIX)
 
-	target_link_libraries(NFSecurityPlugin -static-libstdc++)
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)
 	
 else()
 
-	target_link_libraries(NFSecurityPlugin -static-libstdc++)
 	add_definitions(
 		-DWIN
 		-DELPP_NO_DEFAULT_LOG_FILE

@@ -1,0 +1,27 @@
+{
+  "name": "noahgameframe",
+  "version-string": "0.1.0",
+  "builtin-baseline": "4bb07a326d9b9bce3703272a509e5bc25dd9cfd5",
+  "dependencies": [
+    {
+      "name": "libevent",
+      "features": [
+        "thread"
+      ]
+    },
+    "protobuf",
+    "hiredis",
+    "lua",
+    "sdl2"
+  ],
+  "overrides": [
+    {
+      "name": "protobuf",
+      "version": "3.21.12#4"
+    },
+    {
+      "name": "lua",
+      "version": "5.3.5#6"
+    }
+  ]
+}

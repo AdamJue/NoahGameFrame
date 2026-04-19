@@ -10,7 +10,6 @@ add_library(NFActorPlugin STATIC
 	
 if(UNIX)
 
-	target_link_libraries(NFActorPlugin -static-libstdc++)
 else()
 
 endif()

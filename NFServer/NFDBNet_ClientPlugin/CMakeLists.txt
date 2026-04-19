@@ -19,13 +19,11 @@ set_target_properties( NFDBNet_ClientPlugin PROPERTIES
 link_NFSDK("NFDBNet_ClientPlugin")
 
 if(UNIX)
-	target_link_libraries(NFDBNet_ClientPlugin -static-libstdc++)
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)
 
 else()
-	target_link_libraries(NFDBNet_ClientPlugin -static-libstdc++)
 	add_definitions(
 		-DWIN
 		-DELPP_NO_DEFAULT_LOG_FILE

@@ -1,56 +1,47 @@
-# make sure cmake is installed
-# sudo apt-get update
+#!/usr/bin/env bash
+set -euo pipefail
 
-#g++  sudo apt-get install g++
-#unzip sudo apt-get install unzip
+repo_root="$(cd "$(dirname "$0")" && pwd)"
+mode="$(printf '%s' "${1:-RELEASE}" | tr '[:lower:]' '[:upper:]')"
 
-#compile dep libraries
+case "$(uname -s)" in
+    Darwin)
+        platform="macos"
+        ;;
+    Linux)
+        platform="linux"
+        ;;
+    *)
+        echo "[ERROR] Unsupported platform: $(uname -s)"
+        exit 1
+        ;;
+esac
 
-#example 1: ./buildServer
-#example 2: ./buildServer DEBUG
+case "${mode}" in
+    DEBUG)
+        preset="${platform}-debug"
+        ;;
+    RELEASE|"")
+        preset="${platform}-release"
+        ;;
+    *)
+        preset="${1}"
+        ;;
+esac
 
+echo "[DEPRECATED] buildServer.sh is deprecated."
+echo "[DEPRECATED] Please use CMakePresets directly for configure/build."
+echo "[DEPRECATED] Forwarding to:"
+echo "[DEPRECATED]   cmake --preset ${preset}"
+echo "[DEPRECATED]   cmake --build --preset ${preset}"
 
-echo "we only build NF SDK here"
-cd NFComm/NFMessageDefine
-./cpp.sh
-cd ../../
-
-cd BuildScript/linux/
-chmod -R 755 ./BuildNF.CMake.Tools.sh
-./BuildNF.CMake.Tools.sh
-cd ../../
-
-cd _Out/NFDataCfg/Tool/
-chmod 755 ./NFFileProcess
-chmod 755 ./copy_files.sh
-./copy_files.sh
-cd ..
-cd ..
-cd ..
-
-
-if [ "$1" == "DEBUG" ]; then
-rm -rf ./_Out/Debug/NFServer
-rm -rf ./_Out/Debug/*.a
-
-cd BuildScript/linux/
-chmod -R 755 ./BuildNF.CMake.Debug.sh
-time ./BuildNF.CMake.Debug.sh  
-
-else
-
-rm -rf ./_Out/Release/NFServer
-rm -rf ./_Out/Release/*.a
-
-cd BuildScript/linux/
-chmod -R 755 ./BuildNF.CMake.Release.sh
-time ./BuildNF.CMake.Release.sh 
+if ! command -v cmake >/dev/null 2>&1; then
+    echo "[ERROR] cmake was not found in PATH."
+    echo "[HINT] Install CMake 3.21+ and try again."
+    exit 1
 fi
 
-cd ../../
-
-cd _Out/
-chmod 777 *.sh
-cd ../
-
-#pwd
+cd "${repo_root}"
+git submodule update --init --recursive
+cmake --preset "${preset}"
+cmake --build --preset "${preset}"

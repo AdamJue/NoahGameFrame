@@ -14,11 +14,9 @@ if(UNIX)
 	
 	add_dependencies(NFLogPlugin NFCore )
 
-	target_link_libraries(NFLogPlugin -static-libstdc++)
 else()
 	add_dependencies(NFLogPlugin NFCore )
 	
-	target_link_libraries(NFLogPlugin -static-libstdc++)
 endif()
 
 set_target_properties( NFLogPlugin PROPERTIES OUTPUT_NAME_DEBUG "NFLogPlugin")

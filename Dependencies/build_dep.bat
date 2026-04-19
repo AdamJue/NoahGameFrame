@@ -1,33 +1,31 @@
+@echo off
+setlocal
+set "NF_REPO_ROOT=%~dp0.."
+set "NF_PRESET=%~1"
 
+if "%NF_PRESET%"=="" (
+    set "NF_PRESET=windows-msvc-debug"
+)
+
+echo [DEPRECATED] Dependencies\build_dep.bat is deprecated.
+echo [DEPRECATED] Please use CMakePresets directly for configure/build.
+echo [DEPRECATED] Forwarding to: cmake --preset %NF_PRESET%
+
+where cmake >nul 2>nul
+if errorlevel 1 (
+    echo [ERROR] cmake was not found in PATH.
+    echo [HINT] Install CMake 3.21+ and try again.
+    exit /b 1
+)
+
+pushd "%NF_REPO_ROOT%"
 git submodule update --init --recursive
+if errorlevel 1 (
+    popd
+    exit /b 1
+)
 
-
-cd Dependencies
-
-rm -rf vcpkg
-rm -rf vcpkg_for_nf
-
-git clone https://github.com/ketoo/vcpkg_for_nf.git
-rename vcpkg_for_nf vcpkg
-cd vcpkg
-
-
-7z.exe x installed\x64-windows-static\debug\lib\libprotobufd.zip -oinstalled\x64-windows-static\debug\lib\
-7z.exe x installed\x64-windows-static\lib\libprotobuf.rar -oinstalled\x64-windows-static\lib\
-
-cd ..
-
-xcopy vcpkg\installed\x64-windows-static\lib lib\Release\ /s /e /Y
-xcopy vcpkg\installed\x64-windows-static\bin ..\_Out\Release\  /s /e /Y
-
-xcopy vcpkg\installed\x64-windows-static\debug\lib lib\Debug\  /s /e /Y
-xcopy vcpkg\installed\x64-windows-static\debug\bin ..\_Out\Debug\  /s /e /Y
-
-
-
-xcopy vcpkg\installed\x64-windows-static\tools\protobuf\protoc.exe ..\NFComm\NFMessageDefine\ /s /e /Y
-
-
-
-
-cd..
+cmake --preset "%NF_PRESET%"
+set "NF_EXIT=%ERRORLEVEL%"
+popd
+exit /b %NF_EXIT%

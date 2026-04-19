@@ -1,76 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
 
-if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
-    DISTRO='CentOS'
-    PM='yum'
-elif grep -Eqi "Red Hat Enterprise Linux Server" /etc/issue || grep -Eq "Red Hat Enterprise Linux Server" /etc/*-release; then
-    DISTRO='RHEL'
-    PM='yum'
-elif grep -Eqi "Aliyun" /etc/issue || grep -Eq "Aliyun" /etc/*-release; then
-    DISTRO='Aliyun'
-    PM='yum'
-elif grep -Eqi "Fedora" /etc/issue || grep -Eq "Fedora" /etc/*-release; then
-    DISTRO='Fedora'
-    PM='yum'
-elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
-    DISTRO='Debian'
-    PM='apt-get'
-elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
-    DISTRO='Ubuntu'
-    PM='apt-get'
-elif grep -Eqi "Raspbian" /etc/issue || grep -Eq "Raspbian" /etc/*-release; then
-    DISTRO='Raspbian'
-    PM='apt-get'
-else
-    DISTRO='unknow'
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+preset="${1:-}"
+
+if [[ -z "${preset}" ]]; then
+    case "$(uname -s)" in
+        Darwin)
+            preset="macos-debug"
+            ;;
+        Linux)
+            preset="linux-debug"
+            ;;
+        *)
+            echo "[ERROR] Unsupported platform: $(uname -s)"
+            exit 1
+            ;;
+    esac
 fi
 
+echo "[DEPRECATED] Dependencies/build_dep.sh is deprecated."
+echo "[DEPRECATED] Please use CMakePresets directly for configure/build."
+echo "[DEPRECATED] Forwarding to: cmake --preset ${preset}"
 
-sysOS=`uname -s`
-
-if [ $sysOS == "Darwin" ];then
-    brew install gcc@7
-elif [ $sysOS == "Linux" ];then
-    if [ $DISTRO == "Debian" ] || [ $DISTRO == "Ubuntu" ] || [ $DISTRO == "Raspbian" ]; then
-        sudo apt-get -y install g++-7
-        sudo apt-get -y install libtool
-        sudo apt-get -y install libstdc++-static
-        sudo apt-get -y install libreadline6-dev
-        sudo apt-get -y install libncurses5-dev
-        sudo apt-get -y install pkg-config
-    else
-        sudo yum -y install centos-release-scl
-		    sudo yum -y install devtoolset-7
-		    sudo scl enable devtoolset-7 bash
-        sudo yum -y install libtool
-        sudo yum -y install readline-devel
-        sudo yum -y install ncurses-devel
-        sudo yum -y install libstdc++-static
-        sudo yum -y install pkg-config
-    fi
-
+if ! command -v cmake >/dev/null 2>&1; then
+    echo "[ERROR] cmake was not found in PATH."
+    echo "[HINT] Install CMake 3.21+ and try again."
+    exit 1
 fi
 
-mkdir lib
-mkdir ./lib/Release/
-mkdir ./lib/Debug/
-
+cd "${repo_root}"
 git submodule update --init --recursive
-
-chmod 777 *.sh
-
-./build_hiredis.sh
-./build_vcpkg.sh
-./build_lua.sh
-
-if [ $sysOS == "Darwin" ];then
-    cp -r -f ./vcpkg/installed/x64-osx/lib/* ./lib/Release/
-    cp -r -f ./vcpkg/installed/x64-osx/debug/lib/* ./lib/Debug/
-
-    cp -r -f ./vcpkg/installed/x64-osx/tools/protobuf/* ../NFComm/NFMessageDefine/
-
-elif [ $sysOS == "Linux" ];then
-    cp -r -f ./vcpkg/installed/x64-linux/lib/* ./lib/Release/
-    cp -r -f ./vcpkg/installed/x64-linux/debug/lib/* ./lib/Debug/
-
-    cp -r -f ./vcpkg/installed/x64-linux/tools/protobuf/* ../NFComm/NFMessageDefine/
-fi
+cmake --preset "${preset}"

@@ -20,7 +20,6 @@ link_NFSDK("NFInventoryPlugin")
 
 if(UNIX)
 
-	target_link_libraries(NFInventoryPlugin -static-libstdc++)
 
 	add_definitions(
 		-D_USRDLL
@@ -29,7 +28,6 @@ if(UNIX)
 	
 else()
 
-	target_link_libraries(NFInventoryPlugin -static-libstdc++)
 
 	add_definitions(
 		-DWIN

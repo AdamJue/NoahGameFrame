@@ -21,7 +21,6 @@ link_NFSDK("NFGameServerNet_ClientPlugin")
 
 if(UNIX)
 
-	target_link_libraries(NFGameServerNet_ClientPlugin -static-libstdc++)
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)

@@ -21,10 +21,8 @@ if(UNIX)
 	endif()
 
 	target_link_libraries(NFConfigPlugin  NFCore)
-	target_link_libraries(NFConfigPlugin -static-libstdc++)
 else()
 	message("${ProjectName} ${CMAKE_BUILD_TYPE}")
 	
 	target_link_libraries(NFConfigPlugin  NFCore)
-	target_link_libraries(NFConfigPlugin -static-libstdc++)
 endif()

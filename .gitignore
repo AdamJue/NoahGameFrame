@@ -67,7 +67,10 @@
 
 /cmake-build-debug/*
 /cmake-build-release/*
-/build/*
+/build/
+/build-vcpkg/
+/.cmake/
+/CMakeUserPresets.json
 /.idea/*
 
 

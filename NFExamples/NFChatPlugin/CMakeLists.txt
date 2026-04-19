@@ -21,7 +21,6 @@ link_NFSDK("NFChatPlugin")
 
 if(UNIX)
 
-	target_link_libraries(NFChatPlugin -static-libstdc++)
 
 	add_definitions(
 		-D_USRDLL
@@ -30,7 +29,6 @@ if(UNIX)
 	
 else()
 
-	target_link_libraries(NFChatPlugin -static-libstdc++)
 
 	add_definitions(
 		-DWIN

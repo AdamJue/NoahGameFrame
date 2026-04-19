@@ -14,11 +14,9 @@ if(UNIX)
 	endif()
 		
 	target_link_libraries(NFKernelPlugin  NFCore)
-	target_link_libraries(NFKernelPlugin -static-libstdc++)
 else()
 	add_dependencies(NFKernelPlugin NFCore NFConfigPlugin)
 
-	target_link_libraries(NFKernelPlugin -static-libstdc++)
 
 endif()
 

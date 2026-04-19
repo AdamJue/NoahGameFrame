@@ -16,13 +16,11 @@ set_target_properties( NFLoginNet_HttpServerPlugin PROPERTIES
 link_NFSDK("NFLoginNet_HttpServerPlugin")
 
 if(UNIX)
-	target_link_libraries(NFLoginNet_HttpServerPlugin -static-libstdc++)
 	add_definitions(
 		-DELPP_NO_DEFAULT_LOG_FILE
 	)
 	
 else()
-	target_link_libraries(NFLoginNet_HttpServerPlugin -static-libstdc++)
 	add_definitions(
 		-DWIN
 		-DELPP_NO_DEFAULT_LOG_FILE
